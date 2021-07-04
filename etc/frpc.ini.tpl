@@ -75,7 +75,7 @@ health_check_timeout_s = 3
 health_check_interval_s = 60
 {{ end }}
 
-{{ if eq $service_type "http" }}
+{{ if or (eq $service_type "http") (eq $service_type "https") }}
 
 {{ if and $httpuser $httppwd }}
 http_user = {{ $httpuser }}
