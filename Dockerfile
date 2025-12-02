@@ -1,7 +1,7 @@
 #FROM golang:1.16-alpine AS build
 FROM golang:alpine AS build
 
-ENV FRP_VERSION 0.34.1
+ENV FRP_VERSION 0.65.0
 ENV DOCKER_GEN_VERSION 0.16.1
 
 RUN apk add --no-cache git make gcc linux-headers libc-dev runit
