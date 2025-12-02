@@ -2,6 +2,7 @@
 
 serverAddr = "{{ when (not .Env.FRPC_SERVER_ADDRESS) "127.0.0.1" .Env.FRPC_SERVER_ADDRESS }}"
 serverPort = {{ when (not .Env.FRPC_SERVER_PORT) "7000" .Env.FRPC_SERVER_PORT }}
+loginFailExit = false
 
 {{if .Env.FRPC_LOGFILE }}
 [log]
@@ -31,8 +32,6 @@ tcpMux = {{ when (not .Env.FRPC_TCP_MUX) "true" .Env.FRPC_TCP_MUX }}
 
 [transport.tls]
 enable = true
-
-loginFailExit = false
 
 {{ $frpc_prefix := when (not .Env.FRPC_PREFIX) "frp" .Env.FRPC_PREFIX }}
 
