@@ -66,65 +66,46 @@ name = "{{ print $frpc_prefix "_" $name "_" $address.Port }}"
 type = "{{ $service_type }}"
 localIP = "{{ $network.IP }}"
 localPort = {{ $address.Port }}
-
 {{ if $encryption }}
-[proxies.transport]
-useEncryption = true
+transport.useEncryption = true
 {{ end }}
-
-{{ if $healthcheck }}
-[proxies.healthCheck]
-type = "{{ $service_type }}"
-timeoutSeconds = 3
-intervalSeconds = 60
-{{ end }}
-
 {{ if or (eq $service_type "http") (eq $service_type "https") }}
-
 {{ if and $httpuser $httppwd }}
 httpUser = "{{ $httpuser }}"
 httpPassword = "{{ $httppwd }}"
 {{ end }}
-
 {{ if $subdomain }}
 subdomain = "{{ $subdomain }}"
 {{ end }}
-
 {{ if $domains }}
 customDomains = [{{ $domains }}]
 {{ end }}
-
 {{ if $locations }}
 locations = [{{ $locations }}]
 {{ end }}
-
 {{ if $rewrite }}
 hostHeaderRewrite = "{{ $rewrite }}"
 {{ end }}
-
-[proxies.healthCheck]
-type = "http"
-path = "/"
-
+healthCheck.type = "http"
+healthCheck.path = "/"
 {{ else }}
 {{ if eq $service_type "stcp" }}
 secretKey = "{{ $secret_key }}"
-
 {{ else }}
 # Allocate random free port
 remotePort = 0
 {{ end }}
+{{ if $healthcheck }}
+healthCheck.type = "{{ $service_type }}"
+healthCheck.timeoutSeconds = 3
+healthCheck.intervalSeconds = 60
 {{ end }}
-
+{{ end }}
 {{ if $notify_email }}
 # Provide metadata for notifier plugin
-[proxies.metadatas]
-frpc_prefix = "{{ $frpc_prefix }}"
-local_port = "{{ $address.Port }}"
-{{ if  $notify_email }}
-notify_email = "{{ $notify_email }}"
-{{ end }}
-
+metadatas.frpc_prefix = "{{ $frpc_prefix }}"
+metadatas.local_port = "{{ $address.Port }}"
+metadatas.notify_email = "{{ $notify_email }}"
 {{ end }}
 
 {{ end }}
