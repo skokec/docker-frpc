@@ -78,10 +78,10 @@ httpPassword = "{{ $httppwd }}"
 subdomain = "{{ $subdomain }}"
 {{ end }}
 {{ if $domains }}
-customDomains = [{{ $domains }}]
+customDomains = ["{{ $domains }}"]
 {{ end }}
 {{ if $locations }}
-locations = [{{ $locations }}]
+locations = ["{{ $locations }}"]
 {{ end }}
 {{ if $rewrite }}
 hostHeaderRewrite = "{{ $rewrite }}"
