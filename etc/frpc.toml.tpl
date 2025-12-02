@@ -1,35 +1,38 @@
 # Generated automatically by docker-gen
 
-[common]
-server_addr = {{ when (not .Env.FRPC_SERVER_ADDRESS) "127.0.0.1" .Env.FRPC_SERVER_ADDRESS }}
-server_port = {{ when (not .Env.FRPC_SERVER_PORT) "7000" .Env.FRPC_SERVER_PORT }}
+serverAddr = "{{ when (not .Env.FRPC_SERVER_ADDRESS) "127.0.0.1" .Env.FRPC_SERVER_ADDRESS }}"
+serverPort = {{ when (not .Env.FRPC_SERVER_PORT) "7000" .Env.FRPC_SERVER_PORT }}
 
 {{if .Env.FRPC_LOGFILE }}
-log_file = {{ .Env.FRPC_LOGFILE }}
-
+[log]
+to = "{{ .Env.FRPC_LOGFILE }}"
 # trace, debug, info, warn, error
-log_level = {{ when (not .Env.FRPC_LOG_LEVEL) "warn" .Env.FRPC_LOG_LEVEL }}
-
-log_max_days = {{ when (not .Env.FRPC_LOG_DAYS) "5" .Env.FRPC_LOG_DAYS }}
+level = "{{ when (not .Env.FRPC_LOG_LEVEL) "warn" .Env.FRPC_LOG_LEVEL }}"
+maxDays = {{ when (not .Env.FRPC_LOG_DAYS) "5" .Env.FRPC_LOG_DAYS }}
 {{end}}
 
-token =  {{ when (not .Env.FRPC_AUTH_TOKEN) "abcdefghi" .Env.FRPC_AUTH_TOKEN }}
+[auth]
+method = "token"
+token = "{{ when (not .Env.FRPC_AUTH_TOKEN) "abcdefghi" .Env.FRPC_AUTH_TOKEN }}"
 
 {{if and .Env.FRPC_ADMIN_USER .Env.FRPC_ADMIN_PWD }}
 # set admin address for control frpc's action by http api such as reload (we do not expose this port)
-admin_addr = {{ when (not .Env.FRPC_ADMIN_ADDRESS) "127.0.0.1" .Env.FRPC_ADMIN_ADDRESS }}
-admin_port = {{ when (not .Env.FRPC_ADMIN_PORT) "7400" .Env.FRPC_ADMIN_PORT }}
-admin_user = {{ .Env.FRPC_ADMIN_USER }}
-admin_pwd = {{ .Env.FRPC_ADMIN_PWD }}
+[webServer]
+addr = "{{ when (not .Env.FRPC_ADMIN_ADDRESS) "127.0.0.1" .Env.FRPC_ADMIN_ADDRESS }}"
+port = {{ when (not .Env.FRPC_ADMIN_PORT) "7400" .Env.FRPC_ADMIN_PORT }}
+user = "{{ .Env.FRPC_ADMIN_USER }}"
+password = "{{ .Env.FRPC_ADMIN_PWD }}"
 {{end}}
 
+[transport]
 # connections will be established in advance, default value is zero
-pool_count = {{ when (not .Env.FRPC_POOL_COUNT) "5" .Env.FRPC_POOL_COUNT }}
-tcp_mux = {{ when (not .Env.FRPC_TCP_MUX) "true" .Env.FRPC_TCP_MUX }}
+poolCount = {{ when (not .Env.FRPC_POOL_COUNT) "5" .Env.FRPC_POOL_COUNT }}
+tcpMux = {{ when (not .Env.FRPC_TCP_MUX) "true" .Env.FRPC_TCP_MUX }}
 
-login_fail_exit = false
+[transport.tls]
+enable = true
 
-tls_enable = true
+loginFailExit = false
 
 {{ $frpc_prefix := when (not .Env.FRPC_PREFIX) "frp" .Env.FRPC_PREFIX }}
 
@@ -59,63 +62,68 @@ tls_enable = true
 {{ $healthcheck := when ( or (or (eq $healthcheck "") (eq $healthcheck "true" )) (or (eq $healthcheck "True" ) (eq $healthcheck "1" )) )  true false }}
 {{ if $service_type }}
 
-[{{ print $frpc_prefix "_" $name "_" $address.Port }}]
-
-type = {{ $service_type }}
-local_ip = {{ $network.IP }}
-local_port = {{ $address.Port }}
+[[proxies]]
+name = "{{ print $frpc_prefix "_" $name "_" $address.Port }}"
+type = "{{ $service_type }}"
+localIP = "{{ $network.IP }}"
+localPort = {{ $address.Port }}
 
 {{ if $encryption }}
-use_encryption = true
+[proxies.transport]
+useEncryption = true
 {{ end }}
 
 {{ if $healthcheck }}
-health_check_type = {{ $service_type }}
-health_check_timeout_s = 3
-health_check_interval_s = 60
+[proxies.healthCheck]
+type = "{{ $service_type }}"
+timeoutSeconds = 3
+intervalSeconds = 60
 {{ end }}
 
 {{ if or (eq $service_type "http") (eq $service_type "https") }}
 
 {{ if and $httpuser $httppwd }}
-http_user = {{ $httpuser }}
-http_pwd = {{ $httppwd }}
+httpUser = "{{ $httpuser }}"
+httpPassword = "{{ $httppwd }}"
 {{ end }}
 
 {{ if $subdomain }}
-subdomain = {{ $subdomain }}
+subdomain = "{{ $subdomain }}"
 {{ end }}
 
 {{ if $domains }}
-custom_domains = {{ $domains }}
+customDomains = [{{ $domains }}]
 {{ end }}
 
 {{ if $locations }}
-locations = {{ $locations }}
+locations = [{{ $locations }}]
 {{ end }}
 
 {{ if $rewrite }}
-host_header_rewrite = {{ $rewrite }}
+hostHeaderRewrite = "{{ $rewrite }}"
 {{ end }}
 
-health_check_url = /
+[proxies.healthCheck]
+type = "http"
+path = "/"
 
 {{ else }}
 {{ if eq $service_type "stcp" }}
-sk = {{ $secret_key }}
+secretKey = "{{ $secret_key }}"
 
 {{ else }}
 # Allocate random free port
-remote_port = 0
+remotePort = 0
 {{ end }}
 {{ end }}
 
 {{ if $notify_email }}
 # Provide metadata for notifier plugin
-meta_frpc_prefix = {{ $frpc_prefix }}
-meta_local_port = {{ $address.Port }}
+[proxies.metadatas]
+frpc_prefix = "{{ $frpc_prefix }}"
+local_port = "{{ $address.Port }}"
 {{ if  $notify_email }}
-meta_notify_email = {{ $notify_email }}
+notify_email = "{{ $notify_email }}"
 {{ end }}
 
 {{ end }}
@@ -125,4 +133,3 @@ meta_notify_email = {{ $notify_email }}
 {{ end }}
 {{ end }}
 {{ end }}
-
