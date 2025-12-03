@@ -86,7 +86,6 @@ locations = ["{{ $locations }}"]
 {{ if $rewrite }}
 hostHeaderRewrite = "{{ $rewrite }}"
 {{ end }}
-healthCheck.type = "http"
 healthCheck.path = "/"
 {{ else }}
 {{ if eq $service_type "stcp" }}
