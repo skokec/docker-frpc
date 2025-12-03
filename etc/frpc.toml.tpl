@@ -1,5 +1,7 @@
 # Generated automatically by docker-gen
 
+user = "{{ $frpc_prefix }}"
+
 serverAddr = "{{ when (not .Env.FRPC_SERVER_ADDRESS) "127.0.0.1" .Env.FRPC_SERVER_ADDRESS }}"
 serverPort = {{ when (not .Env.FRPC_SERVER_PORT) "7000" .Env.FRPC_SERVER_PORT }}
 loginFailExit = false
@@ -62,7 +64,7 @@ enable = true
 {{ if $service_type }}
 
 [[proxies]]
-name = "{{ print $frpc_prefix "_" $name "_" $address.Port }}"
+name = "{{ print $name "_" $address.Port }}"
 type = "{{ $service_type }}"
 localIP = "{{ $network.IP }}"
 localPort = {{ $address.Port }}
